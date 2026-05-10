@@ -1,0 +1,35 @@
+name: Build iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build
+        run: |
+          xcodebuild \
+          -scheme WinTouch \
+          -sdk iphoneos \
+          -configuration Release \
+          build
+
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -r build/Release-iphoneos/WinTouch.app Payload/
+          zip -r WinTouch.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: WinTouch-IPA
+          path: WinTouch.ipa
